@@ -14,6 +14,19 @@ contract LoveLetter {
     }
     mapping(uint256 => Letter) public letters;
 
+    event Sent(
+        address indexed from,
+        address indexed to,
+        uint256 indexed id,
+        uint256 amount
+    );
+    event Opened(
+        address indexed from,
+        address indexed to,
+        uint256 indexed id,
+        uint256 amount
+    );
+
     constructor() {
         totalLetters = 0;
     }
@@ -31,8 +44,9 @@ contract LoveLetter {
             etherAmount: msg.value,
             opened: false
         });
-        console.log("id", id);
+        console.log("[send]", id, msg.value);
         totalLetters++;
+        emit Sent(msg.sender, to, id, msg.value);
     }
 
     function open(uint256 id) external returns (string memory message) {
@@ -40,10 +54,11 @@ contract LoveLetter {
         message = letters[id].message;
         letters[id].opened = true;
         uint256 amount = letters[id].etherAmount;
-        console.log("open amount", amount);
+        console.log("[open]", id, amount);
         if (amount > 0) {
             payable(msg.sender).transfer(amount);
         }
+        emit Opened(senders[id], msg.sender, id, amount);
     }
 
     function readMessage(uint256 id)
