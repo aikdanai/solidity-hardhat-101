@@ -51,4 +51,28 @@ describe("LoveLetter", () => {
   it("Should reject if open the opened letter", async () => {
     expect(love.connect(receiver).open(0)).to.revertedWith("Already opened");
   });
+
+  it("Should be able to send letter id 1", async () => {
+    expect(
+      await love
+        .connect(sender)
+        .send(await receiver.getAddress(), "Love chu 3000", {
+          value: utils.parseEther("2"),
+        })
+    ).to.emit(love, "Sent");
+    expect(await love.readMessage(1)).to.equal("Love chu 3000");
+    expect(await love.checkOpened(1)).to.equal(false);
+    expect(await love.getSender(1)).to.equal(await sender.getAddress());
+    expect(await love.getReceiver(1)).to.equal(await receiver.getAddress());
+    expect(await love.getEtherAmount(1)).to.equal(utils.parseEther("2"));
+  });
+
+  it("Should open id 1 successfully", async () => {
+    const before = await receiver.getBalance();
+    const tx = await love.connect(receiver).open(1);
+    expect(tx).to.emit(love, "Opened");
+    const gas = (await tx.wait()).gasUsed.mul(tx.gasPrice || 0);
+    const after = await receiver.getBalance();
+    expect(after.sub(before).add(gas)).to.equal(utils.parseEther("2"));
+  });
 });
