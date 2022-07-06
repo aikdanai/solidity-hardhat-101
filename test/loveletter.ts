@@ -47,4 +47,8 @@ describe("LoveLetter", () => {
     const after = await receiver.getBalance();
     expect(after.sub(before).add(gas)).to.equal(utils.parseEther("1"));
   });
+
+  it("Should reject if open the opened letter", async () => {
+    expect(love.connect(receiver).open(0)).to.revertedWith("Already opened");
+  });
 });

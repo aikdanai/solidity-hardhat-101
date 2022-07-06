@@ -51,6 +51,7 @@ contract LoveLetter {
 
     function open(uint256 id) external returns (string memory message) {
         require(receivers[id] == msg.sender, "Not receiver");
+        require(!letters[id].opened, "Already opened");
         message = letters[id].message;
         letters[id].opened = true;
         uint256 amount = letters[id].etherAmount;
